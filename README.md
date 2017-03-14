@@ -15,7 +15,7 @@ go build ./iperf-server-client-demo.go
 If you wish, you could also install it using the go tools:
 
 ```bash
-go get github.com/JuanCabre/iperf-server-client-demo.go
+go get github.com/JuanCabre/iperf-server-client-demo
 ```
 
 To build the binary for an Odroid, run:
