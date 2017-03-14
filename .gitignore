@@ -1,0 +1,10 @@
+# Ignore Binaries
+*
+!/**/
+!*.*
+
+# Ignore pdf
+*.pdf
+
+# Ignore img
+*.img
