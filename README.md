@@ -21,7 +21,7 @@ go get github.com/JuanCabre/iperf-server-client-demo
 To build the binary for an Odroid, run:
 
 ```bash
-GOOS=linux GOARCH=arm GOARM=7 go build -v ./server-client-demo.go
+GOOS=linux GOARCH=arm GOARM=7 go build -v ./iperf-server-client-demo.go
 ```
 
 # Usage
