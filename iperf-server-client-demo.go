@@ -40,6 +40,7 @@ func init() {
 	minTimer = time.Duration(min) * time.Second
 	maxTimer = time.Duration(max) * time.Second
 	restartTimer = time.Duration(restart) * time.Second
+	debugT("Iperf server restart time set to: %v", restartTimer)
 }
 
 // Fill the map of addresses with the data
