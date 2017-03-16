@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -17,10 +19,10 @@ var debugAddr = dbg.Debug("Address")
 // Choose the minimun and maximun value for the random timer that starts the
 // iperf client
 var (
-	min      int
-	max      int
-	minTimer time.Duration
-	maxTimer time.Duration
+	min, max           int
+	restart            int
+	minTimer, maxTimer time.Duration
+	restartTimer       time.Duration
 )
 
 func init() {
@@ -28,6 +30,8 @@ func init() {
 		"Min value in seconds of the timer for calling the iperf client")
 	flag.IntVar(&max, "max", 7,
 		"Max value in seconds of the timer for calling the iperf client")
+	flag.IntVar(&restart, "restart", 300,
+		"Vlue in seconds for resetting the iperf server")
 	flag.Parse()
 	if min <= 0 || max <= 0 || min > max {
 		log.Fatal("The given values for the timer were invalid")
@@ -35,13 +39,14 @@ func init() {
 
 	minTimer = time.Duration(min) * time.Second
 	maxTimer = time.Duration(max) * time.Second
+	restartTimer = time.Duration(restart) * time.Second
 }
 
 // Fill the map of addresses with the data
 var addresses = map[string]string{
 	"0,0,0": "127.0.0.1",
-	"0,0,1": "127.0.0.1",
-	"0,3,1": "127.0.0.1",
+	// "0,0,1": "192.168.3.20",
+	// "0,3,1": "192.168.4.20",
 	"0,1,1": "127.0.0.1",
 }
 
@@ -69,13 +74,21 @@ func main() {
 }
 
 func startIperfServer() {
-	cmd := exec.Command("iperf", "-s")
-	// Attach the Stdout and Stderr of the iperf server to the os
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		log.Println("Error starting iperf server:", err)
+	for {
+		// Create the context. The exec.CommandContext will kill the Command
+		// called after the context expires
+		ctx, cancel := context.WithTimeout(context.Background(), restartTimer)
+		cmd := exec.CommandContext(ctx, "iperf", "-s")
+		// Attach the Stdout and Stderr of the iperf server to the os
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			log.Println("iperf server:", err)
+		}
+		fmt.Println("Restarting the iperf Server")
+		// Cancel the context to prevent leakage
+		cancel()
 	}
 }
 
